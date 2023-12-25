@@ -3,8 +3,10 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	db "github.com/shaik80/SalahTimingsBackend/internal/db"
 	"github.com/shaik80/SalahTimingsBackend/internal/db/dal"
@@ -27,6 +29,7 @@ func NewMasjidHandler() *MasjidHandler {
 func (c *MasjidHandler) CreateMasjid(ctx *fiber.Ctx) error {
 	// Parse request body
 	var newMasjid model.Masjid
+	newMasjid.Status = "inactive"
 	if err := ctx.BodyParser(&newMasjid); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 	}
@@ -194,6 +197,37 @@ func (c *MasjidHandler) GetMasjidWithPrayers(ctx *fiber.Ctx) error {
 	return ctx.JSON(masjid)
 }
 
-// func (c *MasjidHandler) MasjidLogin(ctx *fiber.Ctx) error {
+func (c *MasjidHandler) MasjidLogin(ctx *fiber.Ctx) error {
+	// Parse request body for updated masjid details
+	var masjid model.Masjid
+	if err := ctx.BodyParser(&masjid); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+	}
 
-// }
+	_, data, err := c.GetMasjidByEmail(ctx, masjid.Email)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email already in use"})
+	}
+
+	// Replace this with your actual authentication logic
+	if (masjid.Email != "admin" && masjid.Email != data.Email) || (masjid.Pass != "password" && masjid.Pass != data.Pass) {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid credentials"})
+	}
+
+	// Create the Claims
+	claims := jwt.MapClaims{
+		"username": masjid.Email,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+	}
+
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Generate encoded token and send it as a response.
+	tokenString, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return ctx.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return ctx.JSON(fiber.Map{"token": tokenString})
+}
