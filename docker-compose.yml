@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+
+  # namaz-timing-app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: namaz_timing_app
+  #   ports:
+  #     - "${SERVER_PORT}:3000"
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     APP_NAME: ${APP_NAME}
+  #     APP_ENV: ${APP_ENV}
+  #     APP_DEBUG: ${APP_DEBUG}
+  #     SERVER_ADDRESS: ${SERVER_ADDRESS}
+  #     SERVER_PORT: ${SERVER_PORT}
+  #     DB_DRIVER: ${DB_DRIVER}
+  #     DB_HOST: ${DB_HOST}
+  #     DB_PORT: ${DB_PORT}
+  #     DB_USERNAME: ${DB_USERNAME}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #     DB_NAME: ${DB_NAME}
+  #     DB_MAX_IDLE_CONNS: ${DB_MAX_IDLE_CONNS}
+  #     DB_MAX_OPEN_CONNS: ${DB_MAX_OPEN_CONNS}
+  #     LOG_LEVEL: ${LOG_LEVEL}
+  #     LOG_FILE_ENABLED: ${LOG_FILE_ENABLED}
+  #     LOG_FILENAME: ${LOG_FILENAME}
+
+volumes:
+  db_data:
+

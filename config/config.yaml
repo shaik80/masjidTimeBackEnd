@@ -1,0 +1,24 @@
+app:
+  name: "Namaz timing"
+  environment: "development"
+  debug: true
+
+server:
+  address: "localhost"
+  port: 3000
+
+database:
+  driver: "postgres"
+  host: "localhost"
+  port: 5432
+  username: "postgres"
+  password: "password"
+  dbname: "namazMasjidDB"
+  maxIdleConns: 10
+  maxOpenConns: 100
+
+logging:
+  level: "info"
+  file:
+    enabled: true
+    filename: "app.log"
